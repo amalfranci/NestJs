@@ -6,7 +6,7 @@ import {
   Param,
   Patch,
   Post,
-  ParseIntPipe
+  ParseIntPipe,ValidationPipe
 } from '@nestjs/common';
 
 import { UsersService } from './users.service';
@@ -34,7 +34,7 @@ export class UsersController {
     return this.usersService.findOne(id);
   }
   @Post() //
-  create(@Body() createUser:CreateUserDto) {
+  create(@Body(ValidationPipe) createUser:CreateUserDto) {
     return this.usersService.createUser(createUser)
   }
 
