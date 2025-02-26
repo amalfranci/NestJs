@@ -7,7 +7,7 @@ import { DatabaseModule } from './users/database.module';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost/nest'), // Connect to MongoDB
+    MongooseModule.forRoot('mongodb://localhost:27017/UserDataNest'), // Connect to MongoDB
     UsersModule, // Import the UsersModule
   ],
   controllers: [AppController],
