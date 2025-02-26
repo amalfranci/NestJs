@@ -1,99 +1,42 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { User } from './model/userSchema'; // Import the User model and type
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UsersService {
-  private users = [
-    {
-      id: 1,
-      name: 'John Doe',
-      role: 'Software Engineer',
-      email: 'johndoe@example.com',
-    },
-    {
-      id: 2,
-      name: 'Jane Smith',
-      role: 'Product Manager',
-      email: 'janesmith@example.com',
-    },
-    {
-      id: 3,
-      name: 'Robert Brown',
-      role: 'UX Designer',
-      email: 'robertbrown@example.com',
-    },
-    {
-      id: 4,
-      name: 'Emily Johnson',
-      role: 'Data Analyst',
-      email: 'emilyjohnson@example.com',
-    },
-    {
-      id: 5,
-      name: 'Michael Lee',
-      role: 'Admin',
-      email: 'michael@gmail.com',
-    },
-  ];
+  constructor(
+    @InjectModel(User.name) private readonly userModel: Model<User>, // Use InjectModel
+  ) {}
 
-  findAll(){
-    return this.users
-     
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const createdUser = new this.userModel(createUserDto); // Create a new document
+    return createdUser.save(); // Save the document
   }
 
-  findOne(id: number) {
-    const user = this.users.find((user) => user.id === id);
-    if(!user)
-    {
-       throw new NotFoundException(`User Not Found with Given : ${id}`)
-    }
-
-    return user;
-  }
-  createUser(userData: {
-    name: string;
-    role:
-      | 'Software Engineer'
-      | 'Product Manager'
-      | 'UX Designer'
-      | 'Data Analyst'
-      | 'Admin';
-    email: string;
-  }) {
-    const uniqueId = this.users.length + 1;
-
-    const newUserData = {
-      id: uniqueId,
-      ...userData,
-    };
-    this.users.push(newUserData);
-    return newUserData;
+  async findAll(): Promise<User[]> {
+    return this.userModel.find().exec();
   }
 
-  update(
-    id: number,
-    updatedata: {
-      name: string;
-      role:
-        | 'Software Engineer'
-        | 'Product Manager'
-        | 'UX Designer'
-        | 'Data Analyst'
-        | 'Admin';
-      email: string;
+  async findOne(id: string): Promise<User | null> {
+    return this.userModel.findById(id).exec();
+  }
+
+  async update(
+    id: string,
+    userUpdate: {
+      name?: string;
+      role?: string;
+      email?: string;
     },
-  ) {
-    this.users = this.users.map((user) => {
-      if (user.id === id) {
-        return { ...user, ...updatedata };
-      }
-      return user;
-    });
-    return this.findOne(id);
+  ): Promise<User | null> {
+    return this.userModel
+      .findByIdAndUpdate(id, userUpdate, { new: true })
+      .exec();
   }
 
-  delete(id: number) {
-    const removedUser = this.findOne(id);
-    this.users = this.users.filter(user => user.id !== id);
-    return removedUser;
+  async delete(id: string): Promise<User | null> {
+    return this.userModel.findByIdAndDelete(id).exec();
   }
 }
